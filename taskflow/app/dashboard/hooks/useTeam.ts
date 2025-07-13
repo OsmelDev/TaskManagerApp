@@ -2,11 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { teamServices } from "@/services/team/team.services";
 import { useTeamStore } from "@/store/user.store";
-import { FieldValues } from "react-hook-form";
-import { useActions } from "./useActions";
-interface Params {
-  data: FieldValues;
-}
+
 export const useTeam = () => {
   const { viewTeams, getMyTask, viewTask } = teamServices();
   const { toast } = useToast();

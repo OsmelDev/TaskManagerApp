@@ -10,6 +10,9 @@ export const axiosIntance = () => {
   const team = axios.create({
     baseURL: "http://localhost:3000/team/",
   });
+  const voiceNote = axios.create({
+    baseURL: "http://localhost:3000/notes/",
+  });
 
-  return { auth, task, team };
+  return { auth, task, team, voiceNote };
 };

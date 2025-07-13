@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser')
 const authRoutes = require('./routes/auth.routes.js')
 const taskRoutes = require('./routes/task.routes.js')
 const teamRoutes = require('./routes/team.routes.js')
+const voiceNotesRoutes = require('./routes/voice_notes.routes.js')
 
 const app = express()
 const PORT = 3000
@@ -19,6 +20,7 @@ app.use(cors({
 app.use("/auth", authRoutes)
 app.use("/task", taskRoutes)
 app.use("/team", teamRoutes)
+app.use("/notes", voiceNotesRoutes)
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutandose en http://localhost:${PORT}`)

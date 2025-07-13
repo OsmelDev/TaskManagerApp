@@ -138,7 +138,6 @@ const SidebarMobile = ({
               </DialogContent>
             </Dialog>
           </div>
-
           <Separator />
 
           <div

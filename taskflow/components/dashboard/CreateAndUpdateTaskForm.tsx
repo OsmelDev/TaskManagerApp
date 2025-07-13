@@ -1,8 +1,9 @@
+"use client";
 import { useActions } from "@/app/dashboard/hooks/useActions";
-import React from "react";
+import React, { FC, useRef } from "react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, FieldValues, useForm } from "react-hook-form";
 import { Select } from "@radix-ui/react-select";
 import {
   SelectContent,
@@ -10,12 +11,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { useTeamStore } from "@/store/user.store";
+import { TaskData, useTeamStore } from "@/store/user.store";
 import { Button } from "../ui/button";
+import VoiceNoteRecorder, { VoiceNoteRecorderHandle } from "./VoiceRecorder";
 
-const CreateAndUpdateTaskForm = () => {
-  const { editingTask, taskForm, getStatusText, createTaskNew, updateTask } =
-    useActions();
+interface CreateAndUpdateTaskFormProps {
+  taskForm: {
+    title: string;
+    description: string;
+    priority: "alta" | "media" | "baja";
+    status: string;
+    _id: string;
+    team_id: string;
+  };
+  editingTask: TaskData | null;
+  getStatusText: (status: string) => string;
+  createTaskNew: (taskData: FieldValues) => Promise<void>;
+}
+
+const CreateAndUpdateTaskForm: FC<CreateAndUpdateTaskFormProps> = ({
+  taskForm,
+  editingTask,
+  getStatusText,
+  createTaskNew,
+}) => {
+  const { updateTask } = useActions();
+
   const {
     control,
     register,
@@ -23,9 +44,26 @@ const CreateAndUpdateTaskForm = () => {
     formState: { errors },
   } = useForm();
   const { teams } = useTeamStore();
+  const voiceNoteRef = useRef<VoiceNoteRecorderHandle>(null);
 
   const handleCreateTask = handleSubmit(async (data) => {
-    await createTaskNew(data);
+    const formData = new FormData();
+
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    formData.append("priority", data.priority);
+    formData.append("status", data.status);
+    formData.append("team", data.team);
+
+    const audioBlob = voiceNoteRef.current?.getAudioBlob();
+    const recordingTime = voiceNoteRef.current?.getRecordingTime();
+
+    if (audioBlob) {
+      formData.append("voiceNote", audioBlob, "recording.wav");
+      formData.append("duration", recordingTime!.toString());
+    }
+
+    await createTaskNew(formData);
   });
 
   const handleUpdateTask = handleSubmit(async (data) => {
@@ -69,95 +107,117 @@ const CreateAndUpdateTaskForm = () => {
         />
       </div>
 
-      <div>
-        <Label htmlFor="priority" className="py-2">
-          Prioridad
-        </Label>
-        <Controller
-          name="priority"
-          control={control}
-          rules={{ required: "La prioridad es requerida" }}
-          render={({ field }) => (
-            <Select onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    editingTask ? taskForm.priority : "Selecciona prioridad"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alta">Alta</SelectItem>
-                <SelectItem value="media">Media</SelectItem>
-                <SelectItem value="baja">Baja</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.priority && (
-          <p className="text-red-500 text-sm">
-            {String(errors.priority.message)}
-          </p>
-        )}
-      </div>
+      <div className="flex flex-1 w-full items-center justify-between">
+        <div className="w-[50%]">
+          <div>
+            <Label htmlFor="priority" className="py-2">
+              Prioridad
+            </Label>
+            <Controller
+              name="priority"
+              control={control}
+              rules={{ required: "La prioridad es requerida" }}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        editingTask ? taskForm.priority : "Selecciona prioridad"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="alta">Alta</SelectItem>
+                    <SelectItem value="media">Media</SelectItem>
+                    <SelectItem value="baja">Baja</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.priority && (
+              <p className="text-red-500 text-sm">
+                {String(errors.priority.message)}
+              </p>
+            )}
+          </div>
 
-      <div>
-        <Label htmlFor="status" className="py-2">
-          Estado
-        </Label>
-        <Controller
-          name="status"
-          control={control}
-          rules={{ required: "El estado es requerido" }}
-          render={({ field }) => (
-            <Select onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    editingTask
-                      ? getStatusText(taskForm.status)
-                      : "Selecciona el estado"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pendiente">pendiente</SelectItem>
-                <SelectItem value="en_proceso">En proceso</SelectItem>
-                <SelectItem value="terminada">Terminado</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        />
-        {errors.status && (
-          <p className="text-red-500 text-sm">
-            {String(errors.status.message)}
-          </p>
-        )}
-      </div>
+          <div>
+            <Label htmlFor="status" className="py-2">
+              Estado
+            </Label>
+            <Controller
+              name="status"
+              control={control}
+              rules={{ required: "El estado es requerido" }}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        editingTask
+                          ? getStatusText(taskForm.status)
+                          : "Selecciona el estado"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pendiente">pendiente</SelectItem>
+                    <SelectItem value="en_proceso">En proceso</SelectItem>
+                    <SelectItem value="terminada">Terminado</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+            {errors.status && (
+              <p className="text-red-500 text-sm">
+                {String(errors.status.message)}
+              </p>
+            )}
+          </div>
 
-      <div>
-        <Label htmlFor="team" className="py-2">
-          Equipo
-        </Label>
+          <div>
+            <Label htmlFor="team" className="py-2">
+              Equipo
+            </Label>
 
-        <Controller
-          name="team"
-          control={control}
-          render={({ field }) => (
-            <Select onValueChange={field.onChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona el equipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {teams.map((team) => (
-                  <SelectItem key={team._id} value={team._id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
+            {teams && (
+              <Controller
+                name="team"
+                control={control}
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona el equipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teams.map((team) => (
+                        <SelectItem key={team._id} value={team._id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="flex justify-center items-center w-[50%]">
+          <Controller
+            name="voiceNote"
+            control={control}
+            render={({ field }) => (
+              <VoiceNoteRecorder
+                field={field}
+                onRecordingComplete={(blob) => {
+                  console.log("Grabación completada", blob);
+                }}
+                ref={voiceNoteRef}
+              />
+            )}
+          />
+        </div>
       </div>
 
       <Button type="submit" className="w-full">

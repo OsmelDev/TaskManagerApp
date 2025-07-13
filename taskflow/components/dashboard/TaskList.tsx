@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -10,59 +11,40 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import {
-  AlertCircle,
-  CheckCircle2,
-  Circle,
-  Clock,
-  Edit,
-  MoreVertical,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { AlertCircle, Edit, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { TaskData, useTaskStore } from "@/store/user.store";
-import { taskServices } from "@/services/task/task.services";
 import { useActions } from "@/app/dashboard/hooks/useActions";
+import { notesServices } from "@/services/voice_note/voice_note.services";
 
 interface TaskListProps {
   setSelectedTask: (value: React.SetStateAction<TaskData | null>) => void;
+  setShowTaskDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  openEditDialog: (task: TaskData) => void;
 }
 
-const TaskList = ({ setSelectedTask }: TaskListProps) => {
-  const { toast } = useToast();
+const TaskList = ({
+  setSelectedTask,
+  setShowTaskDialog,
+  openEditDialog,
+}: TaskListProps) => {
   const { tasks } = useTaskStore();
-  const { deleteTask } = taskServices();
   const {
     selectedTask,
     getPriorityColor,
     getStatusText,
-    openEditDialog,
-    reloadTasks,
-    setShowTaskDialog,
     getStatusColor,
     getStatusIcon,
+    setTaskForm,
+    setEditingTask,
+    handleDeleteTask,
   } = useActions();
 
-  const handleDeleteTask = async (taskId: string) => {
-    try {
-      await deleteTask(taskId);
+  const { audioSrc } = notesServices();
 
-      toast({
-        description: "La tarea se ha eliminado correctamente.",
-        variant: "success",
-      });
-
-      if (selectedTask?._id === taskId) {
-        setSelectedTask(null);
-      }
-
-      await reloadTasks();
-    } catch (error: any) {
-      toast({
-        description: error.message,
-        variant: "destructive",
-      });
+  const handleSelectedTask = async (task: TaskData) => {
+    setSelectedTask(task);
+    if (task) {
+      const response = await audioSrc(task.audioNote);
     }
   };
 
@@ -81,7 +63,7 @@ const TaskList = ({ setSelectedTask }: TaskListProps) => {
               className={`cursor-pointer transition-all border-0 rounded-[10px] backdrop-blur-2xl bg-accent-foreground/60 hover:shadow-md hover:shadow-gray-800 fade-in ${
                 selectedTask?._id === task._id ? "ring-2 ring-gray-900" : ""
               }`}
-              onClick={() => setSelectedTask(task)}
+              onClick={() => handleSelectedTask(task)}
             >
               <CardHeader className="pb-1">
                 <div className="flex items-start justify-between">
@@ -159,7 +141,24 @@ const TaskList = ({ setSelectedTask }: TaskListProps) => {
               <p className="text-gray-600 mb-4">
                 Crea tu primera tarea para comenzar
               </p>
-              <Button onClick={() => setShowTaskDialog(true)}>
+              <Button
+                // onClick={() => {
+                //   console.log("cliked");
+                //   setShowTaskDialog(true);
+                // }}
+                onClick={() => {
+                  setTaskForm({
+                    title: "",
+                    description: "",
+                    priority: "media",
+                    status: "",
+                    _id: "",
+                    team_id: "",
+                  });
+                  setEditingTask(null);
+                  setShowTaskDialog(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Tarea
               </Button>

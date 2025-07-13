@@ -42,33 +42,38 @@ const getTeams = async (req, res) => {
 
 const addMembers = async (req, res) => {
   const { teamId, email } = req.body;
+  
   try {
-    const userFound = await User.findOne({ email })
-    if (!userFound) return res.status(404).send({ message: "No se encontro el usuario" })
-    
+    const userFound = await User.findOne({ email });
+    if (!userFound)
+      return res.status(404).send({ message: "No se encontro el usuario" });
+
     const updatedTeam = await Team.findByIdAndUpdate(
       teamId,
-      { $addToSet: { members: userFound._id } }, 
+      { $addToSet: { members: userFound._id } },
       { new: true }
     );
 
-    return res.status(200).json({message:"Usuario agregado al equipo"});
+    return res.status(200).json({ message: "Usuario agregado al equipo" });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 };
-//------------------------------------------------------------------------------------------
+
 const removeMember = async (req, res) => {
-const {teamId, userId}= req.body
+  const { teamId, email } = req.body;
 
   try {
+    const userFound = await User.findOne({ email })
+    if(!userFound) return res.status(404).send({ message: "No se encontro el usuario" });
+ 
     const updatedTeam = await Team.findByIdAndUpdate(
       teamId,
-      { $pull: { members: userId } },
+      { $pull: { members: userFound._id } },
       { new: true }
     );
-    
-    return res.status(200).json(updatedTeam);
+
+    return res.status(200).json({ message: "Usuario eliminado del equipo" });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -77,14 +82,36 @@ const {teamId, userId}= req.body
 const getTaskTeam = async (req, res) => {
   const { _id } = req.params;
   try {
-    const tasksFound = await Task.find({ team_id: _id });
-
+    const tasksFound = await Task.find({ team_id: _id })
+      .populate({
+        path: "audioNote",
+        select: "_id duration size createdAt", 
+        match: { associatedTeam: _id},
+      })
+      .lean();
     if (!tasksFound)
       return res.status(404).send({ message: "No se encontraron tareas" });
+
+    const tasksWithAudio = tasksFound.map(task => {
+      let audioUrl = null;
+
+      if (task.audioNote) {
+        audioUrl = `/notes/voice-notes/${task.audioNote}`;
+      }
+      
+      return {
+        ...task,
+        voiceNote: task.audioNote ? audioUrl : null
+      }
+    });
+
+    if(tasksWithAudio)
+      return res.status(200).json(tasksWithAudio);
 
     return res.status(200).json(tasksFound);
   } catch (error) {
     return res.status(500).send(error);
+
   }
 };
 module.exports = { create, getTeams, getTaskTeam, addMembers, removeMember };

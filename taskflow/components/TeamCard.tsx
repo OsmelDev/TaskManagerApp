@@ -15,6 +15,7 @@ type TeamCardProps = {
   setSelectedTeam: (value: React.SetStateAction<TeamData | null>) => void;
   openAddDialog: () => void;
   setSelectedTask: (value: React.SetStateAction<TaskData | null>) => void;
+  setRemoveMember: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const TeamCard = ({
@@ -23,6 +24,7 @@ const TeamCard = ({
   setSelectedTeam,
   openAddDialog,
   setSelectedTask,
+  setRemoveMember,
 }: TeamCardProps) => (
   <div
     key={team._id}
@@ -60,15 +62,19 @@ const TeamCard = ({
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
+              setRemoveMember(false);
               openAddDialog();
             }}
           >
             <Edit className="h-4 w-4 mr-2" />
             Add Menber
           </DropdownMenuItem>
+
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
+              setRemoveMember(true);
+              openAddDialog();
             }}
             className="text-red-600"
           >

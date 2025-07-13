@@ -27,7 +27,7 @@ interface ParamsTask {
 interface TaskResponse {
   data: {
     message: string;
-    taskSave: {
+    data: {
       createdAt: string;
       created_by: string;
       description: string;
@@ -37,6 +37,8 @@ interface TaskResponse {
       updatedAt: string;
       __v: 0;
       _id: string;
+      audioNote: string;
+      voiceNote: string;
     };
   };
 }
@@ -65,15 +67,37 @@ export const useActions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { checkAuthService } = authServices();
   const { setUser } = useUserStore();
-  const { loadTasks } = taskServices();
+  const { loadTasks, deleteTask } = taskServices();
   const { saveTasks, setTask } = useTaskStore();
   const { saveTeams } = useTeamStore();
   const { fetchTeams, fetchTasksTeams } = useTeam();
   const router = useRouter();
   const { toast } = useToast();
-
-  const { create, addMember } = teamServices();
+  const [removeMember, setRemoveMember] = useState(false);
+  const { create, addMember, removeMembers } = teamServices();
   const { createTask, update, updateStatus } = taskServices();
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+
+      toast({
+        description: "La tarea se ha eliminado correctamente.",
+        variant: "success",
+      });
+
+      if (selectedTask?._id === taskId) {
+        setSelectedTask(null);
+      }
+
+      await reloadTasks();
+    } catch (error: any) {
+      toast({
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const addMembers = async (data: FieldValues) => {
     try {
@@ -90,12 +114,28 @@ export const useActions = () => {
       });
     }
   };
+  const removeMembersTeam = async (data: FieldValues) => {
+    try {
+      const response = await removeMembers(data);
+      toast({
+        description: response.data.message,
+        variant: "success",
+      });
+      await loadTasks();
+    } catch (error: any) {
+      toast({
+        description: error.response.data.message,
+        variant: "error",
+      });
+    }
+  };
 
   const createTaskNew = async (taskData: FieldValues) => {
     try {
       const { data }: TaskResponse = await createTask(taskData);
+
       if (data) {
-        setTask(data?.taskSave);
+        setTask(data?.data);
         setShowTaskDialog(false);
 
         toast({
@@ -148,11 +188,10 @@ export const useActions = () => {
     _id: string;
     status: string;
   }) => {
-    
     try {
       const { data } = await updateStatus({ _id, status });
       return data;
-    } catch (error:any) {
+    } catch (error: any) {
       toast({
         description: error.message,
         variant: "error",
@@ -321,6 +360,10 @@ export const useActions = () => {
     setShowAddDialog(true);
   };
 
+  const openRemoveDialog = () => {
+    setRemoveMember(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pendiente":
@@ -379,7 +422,12 @@ export const useActions = () => {
     updateTask,
     showAddDialog,
     setShowAddDialog,
+    removeMember,
+    setRemoveMember,
+    openRemoveDialog,
     openAddDialog,
     addMembers,
+    handleDeleteTask,
+    removeMembersTeam,
   };
 };

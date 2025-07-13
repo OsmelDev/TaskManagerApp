@@ -44,5 +44,15 @@ export const teamServices = () => {
     return response;
   };
 
-  return { create, viewTeams, viewTask, getMyTask, addMember };
+  const removeMembers = async (data: FieldValues) => {
+    const body = {
+      teamId: data.team,
+      email: data.email,
+    };
+
+    const response = await team.post("remove", body, { withCredentials: true });
+    return response;
+  };
+
+  return { create, viewTeams, viewTask, getMyTask, addMember, removeMembers };
 };

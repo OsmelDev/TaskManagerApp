@@ -10,7 +10,11 @@ const taskSchema = new mongoose.Schema(
         ref: "Team",
         },
     created_by: { type: mongoose.Schema.Types.ObjectId, 
-      ref: "User" },
+      ref: "User"
+    },
+    audioNote: {
+      type:String
+    }
   }, {
   timestamps:true,
 })

@@ -13,13 +13,13 @@ const ToastAlert = ({ dismiss, toasts, className }: ToastProps) => {
   const getStatusColor = (variant: string | undefined) => {
     switch (variant) {
       case "error":
-        return " rounded-[5px] border-l-[20px] border-l-red-600 bg-sidebar/90 text-red-600";
+        return " rounded-[5px] border-l-[20px] border-l-red-600 bg-sidebar/70 text-red-600";
       case "success":
-        return " rounded-[5px] border-l-[20px] border-l-green-600 bg-sidebar/90 text-green-600 ";
+        return " rounded-[5px] border-l-[20px] border-l-green-600 bg-sidebar/70 text-green-600 ";
       case "warning":
-        return " rounded-[5px] border-l-[20px] border-l-red-800 bg-sidebar/90 text-foreground";
+        return " rounded-[5px] border-l-[20px] border-l-red-800 bg-sidebar/70 text-foreground";
       case "destructive":
-        return " rounded-[5px] border-l-[20px] border-l-red-950 bg-sidebar/90 text-foreground";
+        return " rounded-[5px] border-l-[20px] border-l-red-950 bg-sidebar/70 text-foreground";
       default:
         return "text-gray-500";
     }

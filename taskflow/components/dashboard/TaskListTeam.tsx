@@ -1,4 +1,5 @@
 "use client";
+
 import React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -18,58 +19,37 @@ import {
   Trash2,
   User,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import {
   TaskData,
   TeamData,
   useTaskStore,
   useTeamStore,
 } from "@/store/user.store";
-import { taskServices } from "@/services/task/task.services";
 import { useActions } from "@/app/dashboard/hooks/useActions";
 
 interface TaskListTeamProps {
   selectedTeam: TeamData;
   setSelectedTask: (value: React.SetStateAction<TaskData | null>) => void;
+  setShowTaskDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  openEditDialog: (task: TaskData) => void;
 }
 
-const TaskListTeam = ({ selectedTeam, setSelectedTask }: TaskListTeamProps) => {
-  const { toast } = useToast();
+const TaskListTeam = ({
+  selectedTeam,
+  setSelectedTask,
+  setShowTaskDialog,
+  openEditDialog,
+}: TaskListTeamProps) => {
   const { tasks } = useTeamStore();
   const { saveTasks } = useTaskStore();
-  const { deleteTask } = taskServices();
   const {
     selectedTask,
     getPriorityColor,
     getStatusText,
-    openEditDialog,
-    reloadTasks,
-    setShowTaskDialog,
     getStatusColor,
     getStatusIcon,
+    handleDeleteTask,
   } = useActions();
-
-  const handleDeleteTask = async (taskId: string) => {
-    try {
-      await deleteTask(taskId);
-
-      toast({
-        description: "La tarea se ha eliminado correctamente.",
-        variant: "success",
-      });
-
-      if (selectedTask?._id === taskId) {
-        setSelectedTask(null);
-      }
-
-      await reloadTasks();
-    } catch (error: any) {
-      toast({
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
 
   if (!selectedTeam) {
     return <div>"Seleccione un equipo"</div>;

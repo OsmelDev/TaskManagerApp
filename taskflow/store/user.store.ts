@@ -18,6 +18,8 @@ export interface TaskData {
   team_id?: string;
   __v: 0;
   _id: string;
+  audioNote: string;
+  voiceNote: string;
 }
 
 export interface TeamData {

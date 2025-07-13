@@ -17,33 +17,43 @@ import CreateAndUpdateTaskForm from "./CreateAndUpdateTaskForm";
 import { TaskData, TeamData, useTeamStore } from "@/store/user.store";
 import AddMemberForm from "../AddMemberForm";
 import TeamCard from "../TeamCard";
+import AddAndRemoveMemberForm from "../AddMemberForm";
 
 interface SidebarProps {
   setSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedTeam: React.Dispatch<React.SetStateAction<TeamData | null>>;
   setSelectedTask: React.Dispatch<React.SetStateAction<TaskData | null>>;
+  setShowTaskDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditingTask: React.Dispatch<React.SetStateAction<TaskData | null>>;
+  editingTask: TaskData | null;
+  showTaskDialog: boolean;
 }
 
 const Sidebar = ({
   setSelected,
   setSelectedTeam,
   setSelectedTask,
+  setShowTaskDialog,
+  showTaskDialog,
+  setEditingTask,
+  editingTask,
 }: SidebarProps) => {
   const [showTeamDialog, setShowTeamDialog] = useState(false);
   const {
     setTaskForm,
-    setShowTaskDialog,
-    showTaskDialog,
-    editingTask,
-    setEditingTask,
+    taskForm,
+    getStatusText,
+    createTaskNew,
     openAddDialog,
     showAddDialog,
     setShowAddDialog,
+    removeMember,
+    setRemoveMember,
   } = useActions();
   const { teams } = useTeamStore();
 
   return (
-    <div className="w-80 bg-accent-foreground/20 p-6 border border-accent/10">
+    <div className="w-80 bg-accent-foreground/20 p-6 border border-accent/10 overflow-auto scrollbar-hide">
       <div className="space-y-6">
         <div className="space-y-2">
           <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
@@ -79,7 +89,12 @@ const Sidebar = ({
                 </DialogDescription>
               </DialogHeader>
 
-              <CreateAndUpdateTaskForm />
+              <CreateAndUpdateTaskForm
+                taskForm={taskForm}
+                editingTask={editingTask}
+                getStatusText={getStatusText}
+                createTaskNew={createTaskNew}
+              />
             </DialogContent>
           </Dialog>
 
@@ -108,7 +123,10 @@ const Sidebar = ({
               <Button
                 variant="outline"
                 className="w-full cursor-pointer"
-                onClick={() => openAddDialog()}
+                onClick={() => {
+                  setRemoveMember(false);
+                  openAddDialog();
+                }}
               >
                 <User className="h-4 w-4 mr-2" />
                 Add Member
@@ -117,13 +135,17 @@ const Sidebar = ({
 
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Nuevo Miembro</DialogTitle>
+                <DialogTitle>
+                  {removeMember ? " Eliminar miembro" : "Nuevo Miembro"}
+                </DialogTitle>
                 <DialogDescription>
-                  Agrega miembros a tu equipo
+                  {removeMember
+                    ? "Elimina miembros del equipo"
+                    : "Agrega miembros a tu equipo"}
                 </DialogDescription>
               </DialogHeader>
 
-              <AddMemberForm />
+              <AddAndRemoveMemberForm removeMember={removeMember} />
             </DialogContent>
           </Dialog>
         </div>
@@ -149,6 +171,8 @@ const Sidebar = ({
             ) : (
               teams.map((team) => (
                 <TeamCard
+                  setRemoveMember={setRemoveMember}
+                  key={team._id}
                   setSelectedTask={setSelectedTask}
                   setSelected={setSelected}
                   setSelectedTeam={setSelectedTeam}

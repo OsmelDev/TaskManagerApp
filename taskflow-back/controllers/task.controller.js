@@ -1,60 +1,96 @@
 const Task = require("../schemas/task")
 const User = require("../schemas/user")
 const Team = require("../schemas/team")
+const VoiceNote = require("../schemas/voice");
+
+const saveVoiceNote = async (req, teamId) => {
+  try {
+    if (!req.file) {
+      throw new Error('No se proporcionó ningún archivo de audio');
+    }
+    const { duration = 0 } = req.body; 
+
+    const newVoiceNote = new VoiceNote({
+      audioData: req.file.buffer,
+      contentType: req.file.mimetype,
+      duration: Number(duration),
+      size: req.file.size,
+      created_by: req.user.id,
+      associatedTeam: teamId,
+    });
+
+    await newVoiceNote.save();
+    return newVoiceNote;
+
+  } catch (error) {
+     throw error; 
+  }
+};
 
 const create = async (req, res) => {
   try {
-    const {
+    const { title, description, priority, status, team } = req.body;
+    const { id } = req.user;
+
+    
+    if (await Task.findOne({ title })) {
+      return res.status(400).json({ message: "Ya existe una tarea con ese nombre" });
+    }
+
+  
+    const userFound = await User.findById(id);
+    if (!userFound) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+  
+    let teamId = null;
+    if (team && team !== "undefined") {
+      const teamExists = await Team.exists({ _id: team });
+      if (!teamExists) {
+        return res.status(404).json({ message: "El equipo no existe" });
+      }
+      teamId = team;
+    }
+
+   
+    let voiceNoteId = null;
+    if (req.file) {
+      try {
+        const voiceNote = await saveVoiceNote(req);
+        voiceNoteId = voiceNote._id;
+      } catch (error) {
+        return res.status(500).json({ 
+          error: "Error al guardar la nota de voz",
+          details: error.message 
+        });
+      }
+    }
+
+    const newTask = new Task({
       title,
       description,
       priority,
       status,
-      team } = req.body
-    const {id}= req.user
-    
-    const taskFound = await Task.findOne({ title })
-    const userFound = await User.findById({ _id: id })
-    
-    if (taskFound) {
-      return res.status(401).send({ message: "ya existe una tarea con ese nombre" })
-    }
-    
-    if (team) {
-      const teamFound = await Team.findOne({_id:team })
-      if (!teamFound) {
-        return res.status(401).send({ message: "El equipo no existe" })
-      }
-      
-      const newTask = new Task({
-        title,
-        description,
-        priority,
-        status,
-        team_id: teamFound._id,
-        created_by:userFound._id
-        }
-      )    
-      const taskSave = await newTask.save()
+      team_id: teamId,
+      created_by: id,
+      audioNote: voiceNoteId
+    });
 
-     return res.status(200).json({message:"tarea creada", taskSave})
-    }
-    
-    const newTask = new Task({ title,
-      description,
-      priority,
-      status,
-      created_by:userFound._id
-      }
-    )
-  
-    const taskSave = await newTask.save()
-    return res.status(200).json({ message: "tarea creada", taskSave })
-    
+    const taskSave = await newTask.save();
+
+    return res.status(201).json({
+      message: "Tarea creada exitosamente",
+      data: taskSave
+    });
 
   } catch (error) {
-    return res.status(500).json({error})
+    return res.status(500).json({ 
+      error: "Error interno del servidor",
+      details: error.message 
+    });
   }
-}
+};
 
 const deleteTask = async (req, res) => {
   const { _id } = req.body
@@ -72,16 +108,44 @@ const deleteTask = async (req, res) => {
 }
 
 const getTasks = async (req, res) => {
-  const { id } = req.user
+  const { id } = req.user;
   try {
-    const userFound = await User.findOne({ _id: id })
+   
+    const userFound = await User.findById(id);
+    if (!userFound) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
     const tasksFound = await Task.find({ created_by: userFound._id })
-  return  res.status(200).json(tasksFound)
+      .populate({
+        path: 'audioNote',
+        select: '_id duration size createdAt',
+        match: { created_by: userFound._id }
+      })
+      .lean(); 
+
+    const tasksWithAudio = tasksFound.map(task => {
+
+      let audioUrl = null;
+      if (task.audioNote) {
+        audioUrl = `/notes/voice-notes/${task.audioNote}`;
+      }
+      
+      return {
+        ...task,
+        voiceNote: task.audioNote ? audioUrl : null
+      }
+    });
+
+
+    return res.status(200).json(tasksWithAudio);
   } catch (error) {
-    return res.status(400).send(error.message)
-    
+    return res.status(500).json({ 
+      error: "Error interno del servidor",
+      details: error.message 
+    });
   }
-}
+};
 
 const updateTask = async (req, res) => {
   try {

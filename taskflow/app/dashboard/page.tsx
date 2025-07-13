@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import TaskList from "@/components/dashboard/TaskList";
 import TaskDetails from "@/components/dashboard/TaskDetails";
@@ -11,6 +11,7 @@ import { useActions } from "./hooks/useActions";
 import { useMobile } from "@/hooks/use-mobile";
 import SidebarMobile from "@/components/dashboard/SidebarMobile";
 import Header from "@/components/Header";
+import { useTeamStore } from "@/store/user.store";
 
 export default function DashboardPage() {
   const {
@@ -21,7 +22,13 @@ export default function DashboardPage() {
     setSelectedTeam,
     selectedTask,
     setSelectedTask,
+    showTaskDialog,
+    setShowTaskDialog,
+    openEditDialog,
+    editingTask,
+    setEditingTask,
   } = useActions();
+  const { tasks } = useTeamStore();
 
   const { isMobile } = useMobile();
 
@@ -41,15 +48,27 @@ export default function DashboardPage() {
           />
         ) : (
           <Sidebar
+            editingTask={editingTask}
+            setEditingTask={setEditingTask}
+            setShowTaskDialog={setShowTaskDialog}
+            showTaskDialog={showTaskDialog}
             setSelectedTask={setSelectedTask}
             setSelected={setSelected}
             setSelectedTeam={setSelectedTeam}
           />
         )}
         <div className=" w-full grid grid-cols-1 md:grid-cols-2 gap-2 bg-background pt-2 px-2">
-          {(selected && <TaskList setSelectedTask={setSelectedTask} />) ||
+          {(selected && (
+            <TaskList
+              openEditDialog={openEditDialog}
+              setShowTaskDialog={setShowTaskDialog}
+              setSelectedTask={setSelectedTask}
+            />
+          )) ||
             (selectedTeam && (
               <TaskListTeam
+                openEditDialog={openEditDialog}
+                setShowTaskDialog={setShowTaskDialog}
                 setSelectedTask={setSelectedTask}
                 selectedTeam={selectedTeam}
               />

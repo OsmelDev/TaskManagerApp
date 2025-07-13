@@ -1,8 +1,9 @@
-import React from "react";
+"use client";
+import React, { FC } from "react";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, FieldValues, useForm } from "react-hook-form";
 import { useActions } from "@/app/dashboard/hooks/useActions";
 import {
   Select,
@@ -13,19 +14,32 @@ import {
 } from "./ui/select";
 import { useTeamStore } from "@/store/user.store";
 
-const AddMemberForm = () => {
+interface AddAndRemoveMemberFormProps {
+  removeMember: boolean;
+}
+
+const AddAndRemoveMemberForm: FC<AddAndRemoveMemberFormProps> = ({
+  removeMember,
+}) => {
   const { control, register, handleSubmit } = useForm();
 
-  const { loadTeams, addMembers } = useActions();
+  const { loadTeams, addMembers, removeMembersTeam } = useActions();
   const { teams } = useTeamStore();
 
-  const handleAddMember = handleSubmit(async (data) => {
+  const handleAddMember = handleSubmit(async (data: FieldValues) => {
     await addMembers(data);
+    await loadTeams();
+  });
+  const handleRemoveMember = handleSubmit(async (data: FieldValues) => {
+    await removeMembersTeam(data);
     await loadTeams();
   });
 
   return (
-    <form onSubmit={handleAddMember} className="space-y-4">
+    <form
+      onSubmit={removeMember ? handleRemoveMember : handleAddMember}
+      className="space-y-4"
+    >
       <div className="flex flex-col gap-2">
         <Label htmlFor="email">Introduzca el email del usuario</Label>
         <Input
@@ -60,10 +74,10 @@ const AddMemberForm = () => {
         />
       </div>
       <Button type="submit" className="w-full">
-        Adicionar miembro
+        {removeMember ? "Remove Member" : "Adicionar miembro"}
       </Button>
     </form>
   );
 };
 
-export default AddMemberForm;
+export default AddAndRemoveMemberForm;
