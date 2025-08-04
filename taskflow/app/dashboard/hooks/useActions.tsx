@@ -5,48 +5,23 @@ import {
   TaskData,
   TeamData,
   useTaskStore,
-  useTeamStore,
   useUserStore,
 } from "@/store/user.store";
-import { useTeam } from "./useTeam";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
 
 import { FieldValues } from "react-hook-form";
 import { teamServices } from "@/services/team/team.services";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Circle, Clock } from "lucide-react";
-
-interface Params {
-  data: FieldValues;
-}
-interface ParamsTask {
-  taskData: FieldValues;
-  _id: string;
-}
-interface TaskResponse {
-  data: {
-    message: string;
-    data: {
-      createdAt: string;
-      created_by: string;
-      description: string;
-      priority: priority;
-      status: string;
-      title: string;
-      updatedAt: string;
-      __v: 0;
-      _id: string;
-      audioNote: string;
-      voiceNote: string;
-    };
-  };
-}
+import { useActionsTeam } from "./useActionsTeam";
+import { useTeam } from "./useTeam";
+import { ParamsTask, TaskResponse } from "@/types/types";
 
 export const useActions = () => {
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskData | null>(null);
+  const [removeMember, setRemoveMember] = useState(false);
   const [taskForm, setTaskForm] = useState({
     title: "",
     description: "",
@@ -55,27 +30,25 @@ export const useActions = () => {
     _id: "",
     team_id: "",
   });
-  const [teamForm, setTeamForm] = useState({
-    name: "",
-    description: "",
-  });
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showTeamDialog, setShowTeamDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskData | null>(null);
   const [selected, setSelected] = useState(true);
-  const [selectedTeam, setSelectedTeam] = useState<TeamData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTeam, setSelectedTeam] = useState<TeamData | null>(null);
+
   const { checkAuthService } = authServices();
-  const { setUser } = useUserStore();
   const { loadTasks, deleteTask } = taskServices();
-  const { saveTasks, setTask } = useTaskStore();
-  const { saveTeams } = useTeamStore();
-  const { fetchTeams, fetchTasksTeams } = useTeam();
-  const router = useRouter();
-  const { toast } = useToast();
-  const [removeMember, setRemoveMember] = useState(false);
-  const { create, addMember, removeMembers } = teamServices();
+
+  const { setUser } = useUserStore();
+  const { saveTasks, setTask, taskSelected, setTaskSelected } = useTaskStore();
+  const { addMember, removeMembers } = teamServices();
   const { createTask, update, updateStatus } = taskServices();
+  const { fetchTasksTeams } = useTeam();
+
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const { loadTeams } = useActionsTeam();
 
   const handleDeleteTask = async (taskId: string) => {
     try {
@@ -114,6 +87,7 @@ export const useActions = () => {
       });
     }
   };
+
   const removeMembersTeam = async (data: FieldValues) => {
     try {
       const response = await removeMembers(data);
@@ -198,49 +172,25 @@ export const useActions = () => {
       });
     }
   };
-
-  const reloadTasks = async () => {
-    try {
-      const apiData = await loadTasks();
-
-      if (!Array.isArray(apiData)) {
-        throw new Error("La API no devolvió un array de tareas");
-      }
-      saveTasks(apiData);
-      if (selectedTask) {
-        const updatedSelectedTask =
-          apiData?.find((task) => task._id === selectedTask._id) || null;
-        setSelectedTask(updatedSelectedTask);
-      }
-    } catch (error: any) {
-      toast({
-        description: error.message,
-        variant: "error",
-      });
-    }
-  };
-
   const updateTaskStatus = async (taskId: string, status: string) => {
     if (isUpdatingStatus) return;
     setIsUpdatingStatus(true);
 
     try {
-      if (selectedTask?._id === taskId) {
-        setSelectedTask((prev) =>
-          prev
-            ? { ...prev, status, updated_at: new Date().toISOString() }
-            : null
-        );
-      }
-
-      const response = await updateStatusTask({ _id: taskId, status });
-
-      if (response) {
-        await reloadTasks();
-        toast({
-          description: `La tarea ahora está ${status.replace("_", " ")}.`,
-          variant: "success",
-        });
+      if (taskSelected?._id === taskId) {
+        const response = await updateStatusTask({ _id: taskId, status });
+        if (response) {
+          await reloadTasks();
+          setTaskSelected({
+            ...taskSelected,
+            status,
+            updatedAt: new Date().toDateString(),
+          });
+          toast({
+            description: `La tarea ahora está ${status.replace("_", " ")}.`,
+            variant: "success",
+          });
+        }
       }
     } catch (error: any) {
       await reloadTasks();
@@ -254,37 +204,20 @@ export const useActions = () => {
     }
   };
 
-  const loadTasksTeam = async () => {
-    if (selectedTeam?._id) {
-      await fetchTasksTeams(selectedTeam._id);
-    }
-  };
-
-  const createTeam = async ({ data }: Params) => {
+  const reloadTasks = async () => {
     try {
-      const response = await create({ data });
-      if (!response) return;
+      const apiData = await loadTasks();
 
-      toast({
-        description: "El equipo se ha creado correctamente.",
-        variant: "success",
-      });
-
-      setTeamForm({ name: "", description: "" });
-      setShowTeamDialog(false);
-    } catch (error: any) {
-      toast({
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const loadTeams = async () => {
-    try {
-      const data = await fetchTeams();
-
-      saveTeams(data || []);
+      if (!Array.isArray(apiData)) {
+        throw new Error("La API no devolvió un array de tareas");
+      }
+      saveTasks(apiData);
+      if (selectedTask) {
+        const updatedSelectedTask =
+          apiData?.find((task) => task._id === selectedTask._id) || null;
+        setSelectedTask(updatedSelectedTask);
+        console.log(updatedSelectedTask);
+      }
     } catch (error: any) {
       toast({
         description: error.message,
@@ -292,15 +225,6 @@ export const useActions = () => {
       });
     }
   };
-
-  useEffect(() => {
-    loadTasksTeam();
-  }, [selectedTeam]);
-
-  useEffect(() => {
-    checkUser();
-    reloadTasks();
-  }, []);
 
   const checkUser = async () => {
     try {
@@ -316,31 +240,14 @@ export const useActions = () => {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "alta":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "media":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "baja":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+  useEffect(() => {
+    loadTasksTeam();
+  }, [selectedTeam]);
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "pendiente":
-        return "Pendiente";
-      case "en_proceso":
-        return "En Proceso";
-      case "terminada":
-        return "Terminada";
-      default:
-        return status;
-    }
-  };
+  useEffect(() => {
+    checkUser();
+    reloadTasks();
+  }, []);
 
   const openEditDialog = (task: TaskData) => {
     setEditingTask(task);
@@ -364,42 +271,18 @@ export const useActions = () => {
     setRemoveMember(true);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "pendiente":
-        return "text-gray-500";
-      case "en_proceso":
-        return "text-blue-500";
-      case "terminada":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "pendiente":
-        return <Circle className="h-4 w-4" />;
-      case "en_proceso":
-        return <Clock className="h-4 w-4" />;
-      case "terminada":
-        return <CheckCircle2 className="h-4 w-4" />;
-      default:
-        return <Circle className="h-4 w-4" />;
+  const loadTasksTeam = async () => {
+    if (selectedTeam?._id) {
+      await fetchTasksTeams(selectedTeam._id);
     }
   };
 
   return {
-    getStatusIcon,
-    getStatusColor,
+    checkUser,
     isLoading,
-    setSelectedTeam,
     taskForm,
     setTaskForm,
-    getStatusText,
     reloadTasks,
-    loadTeams,
     setShowTaskDialog,
     showTaskDialog,
     editingTask,
@@ -408,16 +291,9 @@ export const useActions = () => {
     setSelected,
     selectedTask,
     setSelectedTask,
-    getPriorityColor,
     openEditDialog,
-    selectedTeam,
     updateTaskStatus,
     isUpdatingStatus,
-    showTeamDialog,
-    setShowTeamDialog,
-    teamForm,
-    setTeamForm,
-    createTeam,
     createTaskNew,
     updateTask,
     showAddDialog,
@@ -429,5 +305,7 @@ export const useActions = () => {
     addMembers,
     handleDeleteTask,
     removeMembersTeam,
+    setSelectedTeam,
+    selectedTeam,
   };
 };

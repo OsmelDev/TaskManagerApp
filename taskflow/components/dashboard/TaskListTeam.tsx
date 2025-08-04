@@ -26,30 +26,26 @@ import {
   useTeamStore,
 } from "@/store/user.store";
 import { useActions } from "@/app/dashboard/hooks/useActions";
+import { useColors } from "@/app/dashboard/hooks/useColors";
 
 interface TaskListTeamProps {
   selectedTeam: TeamData;
-  setSelectedTask: (value: React.SetStateAction<TaskData | null>) => void;
   setShowTaskDialog: React.Dispatch<React.SetStateAction<boolean>>;
   openEditDialog: (task: TaskData) => void;
+  setTaskSelected: (data: TaskData | null) => void;
 }
 
 const TaskListTeam = ({
   selectedTeam,
-  setSelectedTask,
   setShowTaskDialog,
   openEditDialog,
+  setTaskSelected,
 }: TaskListTeamProps) => {
   const { tasks } = useTeamStore();
   const { saveTasks } = useTaskStore();
-  const {
-    selectedTask,
-    getPriorityColor,
-    getStatusText,
-    getStatusColor,
-    getStatusIcon,
-    handleDeleteTask,
-  } = useActions();
+  const { selectedTask, handleDeleteTask } = useActions();
+  const { getPriorityColor, getStatusText, getStatusColor, getStatusIcon } =
+    useColors();
 
   if (!selectedTeam) {
     return <div>"Seleccione un equipo"</div>;
@@ -84,7 +80,7 @@ const TaskListTeam = ({
               }`}
               onClick={() => {
                 saveTasks([]);
-                setSelectedTask(task);
+                setTaskSelected(task);
               }}
             >
               <CardHeader className="pb-1">
@@ -155,7 +151,7 @@ const TaskListTeam = ({
           ))}
 
           {tasks.length === 0 && (
-            <div className="text-center py-12">
+            <div className="text-center py-12 fade-in">
               <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No hay tareas

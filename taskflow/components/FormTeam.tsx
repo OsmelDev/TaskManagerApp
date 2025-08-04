@@ -1,15 +1,15 @@
-'use client'
+"use client";
 import React from "react";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
-import { useActions } from "@/app/dashboard/hooks/useActions";
+import { useActionsTeam } from "@/app/dashboard/hooks/useActionsTeam";
 
 const FormTeam = () => {
   const { register, handleSubmit } = useForm();
-  const { loadTeams, createTeam } = useActions();
+  const { createTeam, loadTeams } = useActionsTeam();
 
   const handleCreateTeam = handleSubmit(async (data) => {
     await createTeam({ data });

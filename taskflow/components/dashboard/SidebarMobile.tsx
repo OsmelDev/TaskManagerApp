@@ -15,46 +15,67 @@ import FormTeam from "../FormTeam";
 import { useActions } from "@/app/dashboard/hooks/useActions";
 import CreateAndUpdateTaskForm from "./CreateAndUpdateTaskForm";
 import { TaskData, TeamData, useTeamStore } from "@/store/user.store";
-import AddMemberForm from "../AddMemberForm";
+import AddAndRemoveMemberForm from "../AddMemberForm";
 import TeamCard from "../TeamCard";
+import { useColors } from "@/app/dashboard/hooks/useColors";
 
 interface SidebarProps {
   setSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedTeam: React.Dispatch<React.SetStateAction<TeamData | null>>;
   setSelectedTask: React.Dispatch<React.SetStateAction<TaskData | null>>;
+  setShowTaskDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  setEditingTask: React.Dispatch<React.SetStateAction<TaskData | null>>;
+  editingTask: TaskData | null;
+  showTaskDialog: boolean;
+  setTaskSelected: (data: TaskData | null) => void;
 }
 
 const SidebarMobile = ({
   setSelected,
   setSelectedTeam,
   setSelectedTask,
+  setShowTaskDialog,
+  showTaskDialog,
+  setEditingTask,
+  editingTask,
+  setTaskSelected,
 }: SidebarProps) => {
   const [showTeamDialog, setShowTeamDialog] = useState(false);
   const {
     setTaskForm,
-    setShowTaskDialog,
-    showTaskDialog,
-    editingTask,
-    setEditingTask,
+    taskForm,
+    createTaskNew,
     openAddDialog,
     showAddDialog,
     setShowAddDialog,
+    removeMember,
+    setRemoveMember,
   } = useActions();
+  const { getStatusText } = useColors();
   const { teams } = useTeamStore();
   const [open, setOpen] = useState(false);
 
   return (
     <div
-      className={`fixed  z-30 items-center flex flex-row-reverse min-w-[330px] h-full 
-    ${open ? "left-0" : "-left-80"} transition-all 1s ease-in-out
+      className={`fixed   z-30 items-center flex flex-row-reverse max-w-[325px]  h-full 
+    ${open ? "left-0" : "-left-82"} transition-all 1s ease-in-out
     `}
     >
       {open ? (
-        <ArrowBigLeft onClick={() => setOpen(!open)} />
+        <ArrowBigLeft
+          onClick={() => setOpen(!open)}
+          className="absolute -right-4"
+          color="gray"
+        />
       ) : (
-        <ArrowBigRight onClick={() => setOpen(!open)} />
+        <ArrowBigRight
+          onClick={() => setOpen(!open)}
+          className="absolute -right-6"
+          color="gray"
+        />
       )}
-      <div className="h-full w-80 bg-background p-6">
+
+      <div className="h-full  mr-2  bg-background p-6">
         <div className="space-y-6">
           <div className="space-y-2">
             <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
@@ -90,7 +111,12 @@ const SidebarMobile = ({
                   </DialogDescription>
                 </DialogHeader>
 
-                <CreateAndUpdateTaskForm />
+                <CreateAndUpdateTaskForm
+                  taskForm={taskForm}
+                  editingTask={editingTask}
+                  getStatusText={getStatusText}
+                  createTaskNew={createTaskNew}
+                />
               </DialogContent>
             </Dialog>
 
@@ -119,7 +145,10 @@ const SidebarMobile = ({
                 <Button
                   variant="outline"
                   className="w-full cursor-pointer"
-                  onClick={() => openAddDialog()}
+                  onClick={() => {
+                    setRemoveMember(false);
+                    openAddDialog();
+                  }}
                 >
                   <User className="h-4 w-4 mr-2" />
                   Add Member
@@ -128,13 +157,17 @@ const SidebarMobile = ({
 
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Nuevo Miembro</DialogTitle>
+                  <DialogTitle>
+                    {removeMember ? "Quitar Miembro" : "Nuevo Miembro"}
+                  </DialogTitle>
                   <DialogDescription>
-                    Agrega miembros a tu equipo
+                    {removeMember
+                      ? "Elimina miembros de tu equipo"
+                      : "Agrega miembros a tu equipo"}
                   </DialogDescription>
                 </DialogHeader>
 
-                <AddMemberForm />
+                <AddAndRemoveMemberForm removeMember={removeMember} />
               </DialogContent>
             </Dialog>
           </div>
@@ -159,11 +192,14 @@ const SidebarMobile = ({
               ) : (
                 teams.map((team) => (
                   <TeamCard
+                    setRemoveMember={setRemoveMember}
                     setSelectedTask={setSelectedTask}
                     setSelected={setSelected}
                     setSelectedTeam={setSelectedTeam}
                     team={team}
                     openAddDialog={openAddDialog}
+                    key={team._id}
+                    setTaskSelected={setTaskSelected}
                   />
                 ))
               )}

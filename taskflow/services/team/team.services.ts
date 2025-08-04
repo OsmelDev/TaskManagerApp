@@ -1,9 +1,6 @@
 import { axiosIntance } from "@/intance/axios";
+import { Params } from "@/types/types";
 import { FieldValues } from "react-hook-form";
-
-interface Params {
-  data: FieldValues;
-}
 
 export const teamServices = () => {
   const { team } = axiosIntance();

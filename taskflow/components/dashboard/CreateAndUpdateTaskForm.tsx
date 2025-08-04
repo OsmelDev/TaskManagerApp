@@ -120,11 +120,7 @@ const CreateAndUpdateTaskForm: FC<CreateAndUpdateTaskFormProps> = ({
               render={({ field }) => (
                 <Select onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        editingTask ? taskForm.priority : "Selecciona prioridad"
-                      }
-                    />
+                    <SelectValue placeholder="Selecciona prioridad" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="alta">Alta</SelectItem>
@@ -152,13 +148,7 @@ const CreateAndUpdateTaskForm: FC<CreateAndUpdateTaskFormProps> = ({
               render={({ field }) => (
                 <Select onValueChange={field.onChange}>
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        editingTask
-                          ? getStatusText(taskForm.status)
-                          : "Selecciona el estado"
-                      }
-                    />
+                    <SelectValue placeholder={getStatusText(taskForm.status)} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pendiente">pendiente</SelectItem>

@@ -1,9 +1,8 @@
 const VoiceNote = require("../schemas/voice")
 
 const getVoiceNotes = async (req, res) => {
-  
   try {
-    const voiceNote = await VoiceNote.findById(req.params.id);
+    const voiceNote = await VoiceNote.findById({_id:req.params.id});
     if (!voiceNote) {
       console.log("no encontrado")
       return res.status(404).send('Audio no encontrado');
@@ -17,6 +16,7 @@ const getVoiceNotes = async (req, res) => {
     
     res.send(voiceNote.audioData);
   } catch (error) {
+    console.log(error.message)
     res.status(500).send(error.message);
   }
 }

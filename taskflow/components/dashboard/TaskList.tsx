@@ -15,35 +15,30 @@ import { AlertCircle, Edit, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { TaskData, useTaskStore } from "@/store/user.store";
 import { useActions } from "@/app/dashboard/hooks/useActions";
 import { notesServices } from "@/services/voice_note/voice_note.services";
+import { useColors } from "@/app/dashboard/hooks/useColors";
 
 interface TaskListProps {
-  setSelectedTask: (value: React.SetStateAction<TaskData | null>) => void;
+  setTaskSelected: (data: TaskData) => void;
   setShowTaskDialog: React.Dispatch<React.SetStateAction<boolean>>;
   openEditDialog: (task: TaskData) => void;
 }
 
 const TaskList = ({
-  setSelectedTask,
+  setTaskSelected,
   setShowTaskDialog,
   openEditDialog,
 }: TaskListProps) => {
   const { tasks } = useTaskStore();
-  const {
-    selectedTask,
-    getPriorityColor,
-    getStatusText,
-    getStatusColor,
-    getStatusIcon,
-    setTaskForm,
-    setEditingTask,
-    handleDeleteTask,
-  } = useActions();
-
+  const { selectedTask, setTaskForm, setEditingTask, handleDeleteTask } =
+    useActions();
+  const { getPriorityColor, getStatusText, getStatusColor, getStatusIcon } =
+    useColors();
   const { audioSrc } = notesServices();
 
   const handleSelectedTask = async (task: TaskData) => {
-    setSelectedTask(task);
-    if (task) {
+    setTaskSelected(task);
+
+    if (task && task.audioNote) {
       const response = await audioSrc(task.audioNote);
     }
   };
@@ -142,10 +137,6 @@ const TaskList = ({
                 Crea tu primera tarea para comenzar
               </p>
               <Button
-                // onClick={() => {
-                //   console.log("cliked");
-                //   setShowTaskDialog(true);
-                // }}
                 onClick={() => {
                   setTaskForm({
                     title: "",

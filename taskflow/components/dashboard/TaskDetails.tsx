@@ -6,22 +6,17 @@ import { Button } from "../ui/button";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { useActions } from "@/app/dashboard/hooks/useActions";
 import Loading from "../Loading";
-import { TaskData } from "@/store/user.store";
+import { useTaskStore } from "@/store/user.store";
 import { AudioPlayer } from "./AudioPlayer";
+import { useColors } from "@/app/dashboard/hooks/useColors";
 
-interface TaskDetailsProps {
-  selectedTask: TaskData | null;
-}
+const TaskDetails = () => {
+  const { updateTaskStatus, isUpdatingStatus } = useActions();
+  const { getPriorityColor, getStatusText } = useColors();
 
-const TaskDetails = ({ selectedTask }: TaskDetailsProps) => {
-  const {
-    getPriorityColor,
-    getStatusText,
-    updateTaskStatus,
-    isUpdatingStatus,
-  } = useActions();
+  const { taskSelected } = useTaskStore();
 
-  if (!selectedTask) {
+  if (!taskSelected) {
     return <Loading />;
   }
 
@@ -29,33 +24,33 @@ const TaskDetails = ({ selectedTask }: TaskDetailsProps) => {
     <div className="space-y-6 fade-in ">
       <div>
         <h2 className="text-xl font-bold text-foreground mb-2">
-          {selectedTask.title}
+          {taskSelected.title}
         </h2>
         <div className="flex items-center space-x-2 mb-4">
-          <Badge className={getPriorityColor(selectedTask.priority)}>
-            {selectedTask.priority.toUpperCase()}
+          <Badge className={getPriorityColor(taskSelected.priority)}>
+            {taskSelected.priority.toUpperCase()}
           </Badge>
-          <Badge variant="outline">{getStatusText(selectedTask.status)}</Badge>
+          <Badge variant="outline">{getStatusText(taskSelected.status)}</Badge>
         </div>
       </div>
       <Separator />
       <div>
         <h3 className="font-semibold text-foreground mb-2">Descripción</h3>
         <p className="text-foreground/60">
-          {selectedTask.description || "Sin descripción"}
+          {taskSelected.description || "Sin descripción"}
         </p>
       </div>
-      {selectedTask.voiceNote && <AudioPlayer url={selectedTask.voiceNote} />}
+      {taskSelected.voiceNote && <AudioPlayer url={taskSelected.voiceNote} />}
       <div>
         <h3 className="font-semibold text-foreground mb-3">Estado</h3>
         <div className="space-y-2">
           <Button
             variant={
-              selectedTask.status === "pendiente" ? "default" : "outline"
+              taskSelected.status === "pendiente" ? "default" : "outline"
             }
             size="sm"
             className="w-full justify-start"
-            onClick={() => updateTaskStatus(selectedTask._id, "pendiente")}
+            onClick={() => updateTaskStatus(taskSelected._id, "pendiente")}
             disabled={isUpdatingStatus}
           >
             <Circle className="h-4 w-4 mr-2" />
@@ -63,11 +58,11 @@ const TaskDetails = ({ selectedTask }: TaskDetailsProps) => {
           </Button>
           <Button
             variant={
-              selectedTask.status === "en_proceso" ? "default" : "outline"
+              taskSelected.status === "en_proceso" ? "default" : "outline"
             }
             size="sm"
             className="w-full justify-start"
-            onClick={() => updateTaskStatus(selectedTask._id, "en_proceso")}
+            onClick={() => updateTaskStatus(taskSelected._id, "en_proceso")}
             disabled={isUpdatingStatus}
           >
             <Clock className="h-4 w-4 mr-2" />
@@ -75,11 +70,11 @@ const TaskDetails = ({ selectedTask }: TaskDetailsProps) => {
           </Button>
           <Button
             variant={
-              selectedTask.status === "terminada" ? "default" : "outline"
+              taskSelected.status === "terminada" ? "default" : "outline"
             }
             size="sm"
             className="w-full justify-start"
-            onClick={() => updateTaskStatus(selectedTask._id, "terminada")}
+            onClick={() => updateTaskStatus(taskSelected._id, "terminada")}
             disabled={isUpdatingStatus}
           >
             <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -92,11 +87,11 @@ const TaskDetails = ({ selectedTask }: TaskDetailsProps) => {
         <div className="space-y-2 text-sm text-foreground/30">
           <div>
             <span className="font-medium text-foreground/80">Creada:</span>{" "}
-            {new Date(selectedTask.createdAt).toLocaleDateString()}
+            {new Date(taskSelected.createdAt).toLocaleDateString()}
           </div>
           <div>
             <span className="font-medium text-foreground/80">Actualizada:</span>{" "}
-            {new Date(selectedTask.updatedAt).toLocaleDateString()}
+            {new Date(taskSelected.updatedAt).toLocaleDateString()}
           </div>
         </div>
       </div>

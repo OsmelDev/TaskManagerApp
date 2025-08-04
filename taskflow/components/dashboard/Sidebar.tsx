@@ -15,9 +15,9 @@ import FormTeam from "../FormTeam";
 import { useActions } from "@/app/dashboard/hooks/useActions";
 import CreateAndUpdateTaskForm from "./CreateAndUpdateTaskForm";
 import { TaskData, TeamData, useTeamStore } from "@/store/user.store";
-import AddMemberForm from "../AddMemberForm";
 import TeamCard from "../TeamCard";
 import AddAndRemoveMemberForm from "../AddMemberForm";
+import { useColors } from "@/app/dashboard/hooks/useColors";
 
 interface SidebarProps {
   setSelected: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,6 +27,7 @@ interface SidebarProps {
   setEditingTask: React.Dispatch<React.SetStateAction<TaskData | null>>;
   editingTask: TaskData | null;
   showTaskDialog: boolean;
+  setTaskSelected: (data: TaskData | null) => void;
 }
 
 const Sidebar = ({
@@ -37,12 +38,12 @@ const Sidebar = ({
   showTaskDialog,
   setEditingTask,
   editingTask,
+  setTaskSelected,
 }: SidebarProps) => {
   const [showTeamDialog, setShowTeamDialog] = useState(false);
   const {
     setTaskForm,
     taskForm,
-    getStatusText,
     createTaskNew,
     openAddDialog,
     showAddDialog,
@@ -50,6 +51,7 @@ const Sidebar = ({
     removeMember,
     setRemoveMember,
   } = useActions();
+  const { getStatusText } = useColors();
   const { teams } = useTeamStore();
 
   return (
@@ -178,6 +180,7 @@ const Sidebar = ({
                   setSelectedTeam={setSelectedTeam}
                   team={team}
                   openAddDialog={openAddDialog}
+                  setTaskSelected={setTaskSelected}
                 />
               ))
             )}

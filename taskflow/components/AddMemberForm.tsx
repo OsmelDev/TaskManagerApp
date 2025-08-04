@@ -30,6 +30,7 @@ const AddAndRemoveMemberForm: FC<AddAndRemoveMemberFormProps> = ({
     await addMembers(data);
     await loadTeams();
   });
+
   const handleRemoveMember = handleSubmit(async (data: FieldValues) => {
     await removeMembersTeam(data);
     await loadTeams();

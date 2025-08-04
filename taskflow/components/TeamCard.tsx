@@ -16,6 +16,7 @@ type TeamCardProps = {
   openAddDialog: () => void;
   setSelectedTask: (value: React.SetStateAction<TaskData | null>) => void;
   setRemoveMember: React.Dispatch<React.SetStateAction<boolean>>;
+  setTaskSelected: (data: TaskData | null) => void;
 };
 
 const TeamCard = ({
@@ -25,6 +26,7 @@ const TeamCard = ({
   openAddDialog,
   setSelectedTask,
   setRemoveMember,
+  setTaskSelected,
 }: TeamCardProps) => (
   <div
     key={team._id}
@@ -33,6 +35,7 @@ const TeamCard = ({
       setSelected(false);
       setSelectedTeam(team);
       setSelectedTask(null);
+      setTaskSelected(null);
     }}
   >
     <div className="flex items-center justify-between ">

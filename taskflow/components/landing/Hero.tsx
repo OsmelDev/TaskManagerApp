@@ -1,9 +1,13 @@
+'use client'
 import { ArrowRight } from "lucide-react";
 import React from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useUserStore } from "@/store/user.store";
 
 const Hero = () => {
+  const { user } = useUserStore()
+
   return (
     <section className="py-20 px-4 bg-background/50 border-b border-border/50">
       <div className="container mx-auto text-center">
@@ -12,13 +16,14 @@ const Hero = () => {
             Gestiona tus tareas con
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
               {" "}
-              eficiencia
+              eficiencia 
             </span>
           </h1>
           <p className="text-xl text-foreground/60 mb-8 max-w-2xl mx-auto">
             TaskFlow te ayuda a organizar, priorizar y completar tus tareas de
             manera intuitiva. Colabora con tu equipo y mantén todo bajo control.
           </p>
+          {!user &&
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/auth">
               <Button
@@ -30,6 +35,7 @@ const Hero = () => {
               </Button>
             </Link>
           </div>
+           }
         </div>
       </div>
     </section>
