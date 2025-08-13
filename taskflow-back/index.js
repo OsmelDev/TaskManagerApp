@@ -12,15 +12,22 @@ const PORT = 3000
 
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({ 
-  origin: "http://localhost:4000",
-  credentials: true
-}))
-
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use("/auth", authRoutes)
 app.use("/task", taskRoutes)
 app.use("/team", teamRoutes)
 app.use("/notes", voiceNotesRoutes)
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', routes: ['/auth', '/task', '/team', '/notes'] });
+});
+
+ 
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutandose en http://localhost:${PORT}`)
