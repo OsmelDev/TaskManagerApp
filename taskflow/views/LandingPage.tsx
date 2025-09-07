@@ -9,7 +9,7 @@ import Loading from "@/components/Loading";
 import React, { useEffect } from "react";
 
 const LandingPage = () => {
-  const { checkUser, reloadTasks, isLoading } = useActions();
+  const { isLoading } = useActions();
 
   if (isLoading) return <Loading />;
 
