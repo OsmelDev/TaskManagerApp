@@ -7,6 +7,7 @@ import { authServices } from "@/services/auth/auth.services";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import HeaderMenu from "./UserMenu";
+import { ModeToggle } from "./mode-toggle";
 
 const Header = () => {
   const { user, delUser } = useUserStore();
@@ -34,15 +35,13 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b border-border/20 bg-background/50 backdrop-blur-sm  sticky top-0 z-40">
-      <div className="">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center ">
-          <Link href="/" className="flex items-center space-x-2">
-            <Target className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-foreground">TaskFlow</span>
-          </Link>
-          <HeaderMenu user={user} handleSignOut={handleSignOut} />
-        </div>
+    <header className="bg-background/50 backdrop-blur-sm fixed w-full top-0 z-40 shadow-2xl">
+      <div className="  p-2 flex justify-between items-center w-full ">
+        <Link href="/" className="flex items-center space-x-2">
+          <Target className="h-7 w-7 text-blue-600" />
+          <span className="text-xl font-bold text-foreground">TaskFlow</span>
+        </Link>
+        <HeaderMenu user={user} handleSignOut={handleSignOut} />
       </div>
     </header>
   );

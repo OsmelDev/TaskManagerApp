@@ -5,7 +5,7 @@ import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useForm } from "react-hook-form";
-import { useActionsTeam } from "@/app/dashboard/hooks/useActionsTeam";
+import { useActionsTeam } from "@/app/user_home/hooks/useActionsTeam";
 
 const FormTeam = () => {
   const { register, handleSubmit } = useForm();

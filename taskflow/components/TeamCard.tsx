@@ -7,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Button } from "./ui/button";
 
 type TeamCardProps = {
   team: TeamData;
@@ -30,7 +29,7 @@ const TeamCard = ({
 }: TeamCardProps) => (
   <div
     key={team._id}
-    className="p-3 rounded-lg  bg-accent-foreground/60  text-foreground hover:bg-gray-900  transition-colors cursor-pointer"
+    className="p-2 rounded-[5px] shadow-xs shadow-accent/20 bg-accent-foreground/30  text-foreground hover:bg-gray-900  transition-colors cursor-pointer"
     onClick={() => {
       setSelected(false);
       setSelectedTeam(team);
@@ -38,11 +37,11 @@ const TeamCard = ({
       setTaskSelected(null);
     }}
   >
-    <div className="flex items-center justify-between ">
-      <div className="flex justify-between w-[95%]">
+    <div className="flex items-center justify-between gap-5 ">
+      <div className="flex justify-between w-full">
         <div className="flex space-x-2">
-          <Users className="h-4 w-4 " />
-          <span className="text-sm font-medium ">{team.name}</span>
+          <Users className="h-3 w-3 " />
+          <span className="text-xs font-medium ">{team.name}</span>
         </div>
         <div className="flex space-x-2 items-center">
           <User className="h-3 w-3 " />
@@ -51,26 +50,27 @@ const TeamCard = ({
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
+          <MoreVertical
+            className="h-4 w-4 hover:border rounded-[2px]"
             onClick={(e) => {
               e.stopPropagation();
             }}
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent
+          align="end"
+          className="bg-background border-border/20"
+        >
           <DropdownMenuItem
             onClick={(e) => {
               e.stopPropagation();
               setRemoveMember(false);
               openAddDialog();
             }}
+            className="text-xs focus:bg-accent-foreground/40 rounded-[5px] cursor-pointer flex items-center justify-center hover:bg-gray-400/30"
           >
-            <Edit className="h-4 w-4 mr-2" />
-            Add Menber
+            <Edit className="h-1 w-1 " />
+            {/* Add Menber */}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -79,16 +79,16 @@ const TeamCard = ({
               setRemoveMember(true);
               openAddDialog();
             }}
-            className="text-red-600"
+            className="text-xs focus:bg-accent-foreground/40 rounded-[5px] cursor-pointer flex items-center justify-center"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Remove Member
+            <Trash2 className="h-1 w-1" />
+            {/* Remove Member */}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
     {team.description && (
-      <p className="text-xs  mt-1 ml-6">{team.description}</p>
+      <p className="text-[10px]  mt-1 ml-6">{team.description}</p>
     )}
   </div>
 );

@@ -1,5 +1,5 @@
 "use client";
-import { useActions } from "@/app/dashboard/hooks/useActions";
+import { useActions } from "@/app/user_home/hooks/useActions";
 import Header from "@/components/Header";
 import CTA from "@/components/landing/CTA";
 import Features from "@/components/landing/Features";
@@ -10,11 +10,6 @@ import React, { useEffect } from "react";
 
 const LandingPage = () => {
   const { checkUser, reloadTasks, isLoading } = useActions();
-
-  useEffect(() => {
-    checkUser();
-    reloadTasks();
-  }, []);
 
   if (isLoading) return <Loading />;
 

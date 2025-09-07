@@ -73,11 +73,7 @@ const AuthMenu = () => (
 const UserMenu: FC<Props> = ({ user, handleSignOut }) => (
   <div className="flex items-center space-x-4">
     <ModeToggle />
-    <Link href="/dashboard" className="hover:text-accent">
-      <span className="text-md text-foreground font-bold hover:text-white">
-        Dashboard
-      </span>
-    </Link>
+
     <span className="text-md text-foreground font-bold hover:text-white cursor-pointer">
       Hola, {user?.name}
     </span>
@@ -94,7 +90,7 @@ const UserMenu: FC<Props> = ({ user, handleSignOut }) => (
 );
 
 const UserMenuMobile: FC<Props> = ({ user, handleSignOut }) => (
-  <div className="flex items-center space-x-2 relative border">
+  <div className="flex items-center space-x-2 relative ">
     <ModeToggle />
     <DropdownMenu modal={true}>
       <DropdownMenuTrigger asChild>
@@ -112,11 +108,6 @@ const UserMenuMobile: FC<Props> = ({ user, handleSignOut }) => (
         align="end"
         className="bg-background/20 mt-3 w-[100vw] z-30 border-0 backdrop-blur-sm flex flex-col items-center "
       >
-        <DropdownMenuItem>
-          <Link href="/dashboard">
-            <span className="text-sm text-foreground ">Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuItem>
           <Link href="/auth">
             <span className="text-sm text-foreground">Hola, {user?.name}</span>

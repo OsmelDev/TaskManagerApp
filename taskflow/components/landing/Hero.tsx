@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { ArrowRight } from "lucide-react";
 import React from "react";
 import { Button } from "../ui/button";
@@ -6,36 +6,36 @@ import Link from "next/link";
 import { useUserStore } from "@/store/user.store";
 
 const Hero = () => {
-  const { user } = useUserStore()
+  const { user } = useUserStore();
 
   return (
-    <section className="py-20 px-4 bg-background/50 border-b border-border/50">
+    <section className="py-20 px-4 bg-background/50 border-b border-border/10 h-screen flex flex-col justify-center items-center ">
       <div className="container mx-auto text-center">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto flex flex-col gap-8">
           <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6">
             Gestiona tus tareas con
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
               {" "}
-              eficiencia 
+              eficiencia
             </span>
           </h1>
           <p className="text-xl text-foreground/60 mb-8 max-w-2xl mx-auto">
             TaskFlow te ayuda a organizar, priorizar y completar tus tareas de
             manera intuitiva. Colabora con tu equipo y mantén todo bajo control.
           </p>
-          {!user &&
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/auth">
-              <Button
-                size="lg"
-                className="text-md font-bold px-8 py-3 cursor-pointer rounded-[5px] bg-chart-3"
-              >
-                Comenzar Ahora Gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-           }
+          {!user && (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/auth">
+                <Button
+                  size="lg"
+                  className="text-md font-bold px-8 py-3 cursor-pointer rounded-[5px] bg-chart-3"
+                >
+                  Comenzar Ahora Gratis
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </section>
