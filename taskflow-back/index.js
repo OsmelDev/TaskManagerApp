@@ -29,6 +29,22 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', routes: ['/auth', '/task', '/team', '/notes'] });
 });
 
+app.get('/', async (req, res) => {
+  try {
+    // Verificar estado de MongoDB
+    const dbStatus = mongoose.connection.readyState;
+    const status = {
+      server: 'running',
+      database: dbStatus === 1 ? 'connected' : 'disconnected',
+      timestamp: new Date().toISOString()
+    };
+    
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({ error: 'Health check failed' });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Servidor ejecutandose en http://localhost:${PORT}`)
