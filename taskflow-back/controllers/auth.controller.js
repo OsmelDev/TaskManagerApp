@@ -5,6 +5,7 @@ const { SECRET_KEY, SALT_ROUNDS } = require("../config")
 const jwt = require('jsonwebtoken')
 
 const register = async (req, res) => {
+  
   try {
     const {email, password, name} = req.body
     const userFound = await User.findOne({ email:email })  
@@ -29,18 +30,25 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
-  const { email, password } = req.body
+   console.log('Login attempt:', req.body);
   try {
+    const { email, password } = req.body
     const userFound = await User.findOne({ email }) 
+    console.log("busco usuario")
     
     if (!userFound) {
+    console.log("no encontro")
+
       return res.status(404).send({ message: "No se encuentra el usuario" })
     }
     
-      const isMatch = await bcrypt.compare(password, userFound.password);
+    const isMatch = await bcrypt.compare(password, userFound.password);
+    console.log("comparo password")
+    
       if (!isMatch) return res.status(400).send({message:"Password incorrect"});
   
     const token = await createAccessToken({ id: userFound._id });
+    console.log("creo token")
     
 
     return res.status(200).cookie("flowToken", token).json({

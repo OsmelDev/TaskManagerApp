@@ -34,7 +34,7 @@ app.get('/', async (req, res) => {
   try {
     // Verificar estado de MongoDB
     const dbStatus = mongoose.connection.readyState;
-    console.log(dbStatus)
+    
     const status = {
       server: 'running',
       database: dbStatus === 1 ? 'connected' : 'disconnected',
@@ -46,6 +46,7 @@ app.get('/', async (req, res) => {
     res.status(500).json({ error: 'Health check failed' });
   }
 });
+
 
 
 app.listen(PORT, () => {
