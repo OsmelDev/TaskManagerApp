@@ -1,4 +1,5 @@
 const express = require('express')
+const mongoose = require('mongoose')
 const connectDBLocal = require('./db/dbLocal')
 const connectDB = require('./db/connectDB.js')
 const cors = require('cors') 
@@ -33,6 +34,7 @@ app.get('/', async (req, res) => {
   try {
     // Verificar estado de MongoDB
     const dbStatus = mongoose.connection.readyState;
+    console.log(dbStatus)
     const status = {
       server: 'running',
       database: dbStatus === 1 ? 'connected' : 'disconnected',
