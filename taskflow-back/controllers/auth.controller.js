@@ -23,6 +23,7 @@ const register = async (req, res) => {
     const token = await createAccessToken({ id: userSaved._id })
     return res.status(200).cookie("flowToken", token).json({message:"Cuenta creada"})
   } catch (error) {
+    console.log(error)
     return res.status(500).json(error)
   }
 }

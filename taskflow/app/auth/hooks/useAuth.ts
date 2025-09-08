@@ -19,7 +19,7 @@ export const useAuth = () => {
       setIsLoading(true);
       if (data) {
         setUser(data);
-        router.push("/dashboard");
+        router.push("/user_home");
         toast({
           description: "Has iniciado sesión correctamente.",
           variant: "success",
